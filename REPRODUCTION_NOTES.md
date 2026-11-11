@@ -25,18 +25,28 @@
 | Baseline | 14.06% | 35.04% | ~197s | ReLU + dropout + augmentation |
 | tanh | 22.72% | 48.70% | ~215s | same recipe, tanh |
 | No dropout | 29.18% | 56.64% | ~214s | dropout = 0 |
-| Baseline, 90 ep | 28.34% | 56.06% | ~206s | 90-epoch extension |
-| No dropout, 90 ep | 41.94% | 69.68% | ~208s | 90-epoch extension |
+| Baseline, 90 ep | 28.34% | 56.06% | ~206s | dropout 0.5 |
+| tanh, 90 ep | 33.12% | 60.70% | ~194s | tanh + dropout 0.5 |
+| dropout 0.25, 90 ep | 35.68% | 63.98% | ~194s | ReLU + dropout 0.25 |
+| No dropout, 90 ep | 41.94% | 69.68% | ~208s | dropout 0.0 |
 
 **Key finding:** both ablations outperformed the baseline. At this scale
 (ImageNet-100, 30 epochs), dropout 0.5 appears too strong and causes
 underfitting; tanh + dropout also beats ReLU + dropout. The 90-epoch extension
-confirms the dropout result: no-dropout reaches 41.94% top-1 versus 28.34% for
-the baseline, a 13.6-point gap. The 90-epoch baseline is still slightly below
-the 30-epoch no-dropout run, so dropout underfits even with longer training.
-This is a single-seed result and does not directly contradict the paper's full
-ImageNet-1k claims, which used 1.2M images and 1,000 classes. It shows that the
-paper's regularization and activation claims are regime-dependent.
+confirms a clear dropout dose-response:
+
+```text
+dropout 0.5  → 28.34%
+dropout 0.25 → 35.68%
+dropout 0.0  → 41.94%
+```
+
+The 90-epoch baseline is still slightly below the 30-epoch no-dropout run
+(29.18%), so dropout 0.5 underfits even with longer training. tanh + dropout 0.5
+(33.12%) beats ReLU + dropout 0.5 (28.34%) but remains below the lower-dropout
+runs. This is a single-seed result and does not directly contradict the paper's
+full ImageNet-1k claims, which used 1.2M images and 1,000 classes. It shows that
+the paper's regularization and activation claims are regime-dependent.
 
 ## Deviations from the paper
 

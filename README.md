@@ -25,17 +25,27 @@ matched the paper's ImageNet-1k numbers.
 | Ours: baseline | ImageNet-100 | 30 | **14.06%** | **35.04%** | ReLU + dropout, 1× RTX 4080 Super |
 | Ours: tanh | ImageNet-100 | 30 | **22.72%** | **48.70%** | same recipe, tanh |
 | Ours: no dropout | ImageNet-100 | 30 | **29.18%** | **56.64%** | dropout = 0 |
-| Ours: baseline, 90 ep | ImageNet-100 | 90 | **28.34%** | **56.06%** | 90-epoch extension |
-| Ours: no dropout, 90 ep | ImageNet-100 | 90 | **41.94%** | **69.68%** | 90-epoch extension |
+| Ours: baseline, 90 ep | ImageNet-100 | 90 | **28.34%** | **56.06%** | dropout 0.5 |
+| Ours: tanh, 90 ep | ImageNet-100 | 90 | **33.12%** | **60.70%** | tanh + dropout 0.5 |
+| Ours: dropout 0.25, 90 ep | ImageNet-100 | 90 | **35.68%** | **63.98%** | ReLU + dropout 0.25 |
+| Ours: no dropout, 90 ep | ImageNet-100 | 90 | **41.94%** | **69.68%** | dropout 0.0 |
 
 Paper numbers are accuracy derived from the reported error rates. **Do not compare
 absolute numbers across different datasets.** The useful comparison is the
 **relative trend** between our runs.
 
-At 90 epochs, the no-dropout model still beats the baseline by **13.6 points**
-top-1. In fact, the 90-epoch baseline (28.34%) is still slightly below the
-**30-epoch** no-dropout run (29.18%). Dropout 0.5 underfits at this scale even
-with a longer schedule.
+At 90 epochs, dropout shows a clear **dose-response**:
+
+```text
+dropout 0.5  → 28.34%
+dropout 0.25 → 35.68%
+dropout 0.0  → 41.94%
+```
+
+Less dropout is better at this scale. The 90-epoch baseline (28.34%) is still
+slightly below the **30-epoch** no-dropout run (29.18%), so dropout 0.5 underfits
+even with a longer schedule. tanh + dropout 0.5 (33.12%) also beats ReLU +
+dropout 0.5 (28.34%), but remains below the lower-dropout runs.
 
 ## Repository layout
 
