@@ -1,0 +1,7 @@
+base: baseline.yaml
+
+model:
+  activation: tanh
+
+output:
+  dir: runs/tanh

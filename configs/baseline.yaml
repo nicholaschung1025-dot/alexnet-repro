@@ -1,0 +1,33 @@
+seed: 0
+
+data:
+  root: ~/data/imagenet100
+  train_dir: train
+  val_dir: val
+  num_classes: 100
+  input_size: 224
+  batch_size: 128
+  num_workers: 2
+  pin_memory: true
+  augment: true
+
+model:
+  dropout: 0.5
+  activation: relu
+  use_lrn: true
+  init: kaiming
+
+train:
+  epochs: 30
+  optimizer: sgd
+  lr: 0.001
+  momentum: 0.0
+  weight_decay: 0.0005
+  lr_milestones: [15, 23]
+  amp: false
+  label_smoothing: 0.0
+  grad_clip: 0.0
+  limit_batches: null
+
+output:
+  dir: runs/baseline

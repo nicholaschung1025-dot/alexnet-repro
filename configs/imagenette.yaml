@@ -1,0 +1,8 @@
+base: baseline.yaml
+
+data:
+  root: ~/data/imagenette2-320
+  num_classes: 10
+
+output:
+  dir: runs/imagenette_baseline

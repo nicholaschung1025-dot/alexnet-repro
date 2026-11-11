@@ -1,0 +1,16 @@
+base: baseline.yaml
+
+data:
+  root: ~/data/imagenet100_10k
+  num_classes: 100
+  num_workers: 2
+
+train:
+  epochs: 10
+  lr: 0.001
+  momentum: 0.0
+  amp: false
+  grad_clip: 0.0
+
+output:
+  dir: runs/low_quota

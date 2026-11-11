@@ -1,0 +1,7 @@
+base: baseline.yaml
+
+model:
+  dropout: 0.0
+
+output:
+  dir: runs/no_dropout

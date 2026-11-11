@@ -1,0 +1,8 @@
+base: baseline.yaml
+
+train:
+  epochs: 90
+  lr_milestones: [45, 68]
+
+output:
+  dir: runs/long_baseline

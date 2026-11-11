@@ -1,0 +1,8 @@
+base: baseline.yaml
+
+data:
+  root: ~/data/imagenet100
+  num_classes: 100
+
+output:
+  dir: runs/imagenet100_baseline

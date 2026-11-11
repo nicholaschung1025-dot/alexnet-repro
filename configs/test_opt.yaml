@@ -1,0 +1,14 @@
+base: baseline.yaml
+
+data:
+  num_workers: 2
+
+train:
+  epochs: 1
+  lr: 0.001
+  momentum: 0.0
+  amp: false
+  grad_clip: 0.0
+
+output:
+  dir: runs/test_opt

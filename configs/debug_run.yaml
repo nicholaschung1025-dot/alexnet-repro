@@ -1,0 +1,13 @@
+base: baseline.yaml
+
+data:
+  num_workers: 2
+
+train:
+  epochs: 5
+  lr: 0.001
+  amp: false
+  grad_clip: 5.0
+
+output:
+  dir: runs/debug

@@ -1,0 +1,7 @@
+base: baseline.yaml
+
+data:
+  augment: false
+
+output:
+  dir: runs/no_aug

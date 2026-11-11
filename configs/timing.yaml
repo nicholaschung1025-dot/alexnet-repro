@@ -1,0 +1,10 @@
+base: baseline.yaml
+
+train:
+  epochs: 1
+  limit_batches: 50
+  amp: false
+  grad_clip: 5.0
+
+output:
+  dir: runs/timing_fp32

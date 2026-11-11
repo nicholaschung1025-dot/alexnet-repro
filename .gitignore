@@ -1,0 +1,24 @@
+__pycache__/
+*.py[cod]
+.venv/
+.DS_Store
+
+# Data and experiment outputs
+data/
+runs/
+checkpoints/
+logs/*
+!logs/.gitkeep
+results/*
+!results/.gitkeep
+!results/*.csv
+!results/*.json
+!results/*.png
+!results/*.pdf
+!results/figures/
+!results/figures/*.png
+
+# Checkpoints and Slurm logs
+*.pth
+*.pt
+slurm-*.out

@@ -1,0 +1,13 @@
+base: baseline.yaml
+
+data:
+  batch_size: 8
+  num_workers: 0
+  pin_memory: false
+
+train:
+  epochs: 1
+  limit_batches: 2
+
+output:
+  dir: runs/smoke

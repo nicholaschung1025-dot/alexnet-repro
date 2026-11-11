@@ -1,0 +1,11 @@
+# Install torch/torchvision separately for your CUDA version, e.g.:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+numpy>=1.24
+Pillow>=10.0
+PyYAML>=6.0
+
+# Only needed for the Hugging Face ImageNet-100 download/conversion
+datasets>=2.18
+huggingface_hub>=0.23
+tqdm>=4.66
+matplotlib>=3.8
