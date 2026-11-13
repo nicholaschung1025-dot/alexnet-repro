@@ -242,6 +242,28 @@ Resume:
 python -m src.train --config configs/baseline.yaml --resume
 ```
 
+### Paper-recipe runs
+
+`configs/paper_*.yaml` keep the paper's recipe; only the dataset changes.
+
+- Gaussian init, std 0.01, bias 1 in Conv2/4/5 and FC1/FC2.
+- SGD 0.01, momentum 0.9, weight decay 5e-4.
+- Fixed 224 crop from 256, PCA colour augmentation.
+- 10-crop evaluation with softmax averaging (`--ten-crop`).
+- LR reduced ×0.1 when validation top-1 plateaus, mirroring the paper's manual drops.
+
+```bash
+# 50-step stability check
+sbatch -J paper_smoke train.slurm configs/paper_smoke.yaml
+
+# Four 90-epoch runs
+./submit_paper.sh
+
+# Final 10-crop number
+python -m src.evaluate --config configs/paper_baseline.yaml \
+  --checkpoint runs/paper_baseline/best.pth --ten-crop
+```
+
 ## Evaluation
 
 ```bash
