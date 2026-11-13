@@ -4,7 +4,7 @@ data:
   ten_crop: false
 
 train:
-  epochs: 1
+  epochs: 3
   limit_batches: 50
 
 output:
