@@ -84,6 +84,7 @@ def main() -> None:
         use_lrn=bool(model_cfg.get("use_lrn", True)),
         init=str(model_cfg.get("init", "paper")),
         paper_bias=float(model_cfg.get("paper_bias", 1.0)),
+        lrn_alpha=float(model_cfg.get("lrn_alpha", 1e-4)),
     ).to(device)
 
     criterion = nn.CrossEntropyLoss(

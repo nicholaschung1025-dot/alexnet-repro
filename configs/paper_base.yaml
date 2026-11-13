@@ -19,6 +19,8 @@ model:
   activation: relu
   use_lrn: true
   init: paper
+  # Caffe divides alpha by the window size (n=5); PyTorch does not.
+  lrn_alpha: 0.00002
 
 train:
   epochs: 90

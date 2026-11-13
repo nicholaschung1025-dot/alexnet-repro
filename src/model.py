@@ -29,6 +29,7 @@ class AlexNet(nn.Module):
         use_lrn: bool = True,
         init: str = "paper",
         paper_bias: float = 1.0,
+        lrn_alpha: float = 1e-4,
     ) -> None:
         super().__init__()
         self.num_classes = num_classes
@@ -38,7 +39,7 @@ class AlexNet(nn.Module):
         self.conv1 = nn.Conv2d(3, 96, kernel_size=11, stride=4, padding=2)
         self.act1 = _activation(activation)
         self.lrn1 = (
-            nn.LocalResponseNorm(5, alpha=1e-4, beta=0.75, k=2.0)
+            nn.LocalResponseNorm(5, alpha=lrn_alpha, beta=0.75, k=2.0)
             if use_lrn
             else nn.Identity()
         )
@@ -47,7 +48,7 @@ class AlexNet(nn.Module):
         self.conv2 = nn.Conv2d(96, 256, kernel_size=5, padding=2, groups=2)
         self.act2 = _activation(activation)
         self.lrn2 = (
-            nn.LocalResponseNorm(5, alpha=1e-4, beta=0.75, k=2.0)
+            nn.LocalResponseNorm(5, alpha=lrn_alpha, beta=0.75, k=2.0)
             if use_lrn
             else nn.Identity()
         )
