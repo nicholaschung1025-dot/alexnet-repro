@@ -1,0 +1,7 @@
+base: paper_smoke.yaml
+
+model:
+  paper_bias: 0.0
+
+output:
+  dir: runs/paper_smoke_bias0

@@ -1,0 +1,16 @@
+base: paper_base.yaml
+
+data:
+  ten_crop: false
+
+model:
+  init: kaiming
+
+train:
+  lr: 0.001
+  momentum: 0.9
+  epochs: 3
+  limit_batches: 50
+
+output:
+  dir: runs/smoke_kaiming_lr001

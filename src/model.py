@@ -28,6 +28,7 @@ class AlexNet(nn.Module):
         activation: str = "relu",
         use_lrn: bool = True,
         init: str = "paper",
+        paper_bias: float = 1.0,
     ) -> None:
         super().__init__()
         self.num_classes = num_classes
@@ -70,9 +71,9 @@ class AlexNet(nn.Module):
         self.act7 = _activation(activation)
         self.fc3 = nn.Linear(4096, num_classes)
 
-        self._initialize_weights(init)
+        self._initialize_weights(init, paper_bias)
 
-    def _initialize_weights(self, init: str) -> None:
+    def _initialize_weights(self, init: str, paper_bias: float = 1.0) -> None:
         if init == "paper":
             for module in self.modules():
                 if isinstance(module, (nn.Conv2d, nn.Linear)):
@@ -82,7 +83,7 @@ class AlexNet(nn.Module):
             # The paper sets biases to 1 in Conv2/4/5 and the hidden FC layers,
             # giving ReLUs positive inputs early in training.
             for layer in (self.conv2, self.conv4, self.conv5, self.fc1, self.fc2):
-                nn.init.constant_(layer.bias, 1.0)
+                nn.init.constant_(layer.bias, paper_bias)
         elif init == "kaiming":
             for module in self.modules():
                 if isinstance(module, nn.Conv2d):

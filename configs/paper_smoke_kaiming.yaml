@@ -1,0 +1,7 @@
+base: paper_smoke.yaml
+
+model:
+  init: kaiming
+
+output:
+  dir: runs/paper_smoke_kaiming
