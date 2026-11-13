@@ -247,8 +247,10 @@ python -m src.train --config configs/baseline.yaml --resume
 `configs/paper_*.yaml` keep the paper's recipe; only the dataset changes.
 
 - Gaussian init, std 0.01, bias 1 in Conv2/4/5 and FC1/FC2.
-- SGD 0.01, momentum 0.9, weight decay 5e-4.
+- SGD 0.003, momentum 0.9, weight decay 5e-4. The paper's 0.01 stays at
+  chance with Caffe-scale inputs here; 0.003 was the largest stable value tested.
 - Fixed 224 crop from 256, PCA colour augmentation.
+- LRN `alpha=2e-5`, matching Caffe's `alpha/n` for n=5.
 - 10-crop evaluation with softmax averaging (`--ten-crop`).
 - LR reduced ×0.1 when validation top-1 plateaus, mirroring the paper's manual drops.
 

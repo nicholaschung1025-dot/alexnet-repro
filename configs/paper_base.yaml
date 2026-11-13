@@ -25,7 +25,8 @@ model:
 train:
   epochs: 90
   optimizer: sgd
-  lr: 0.01
+  # 0.01 does not train with Caffe-scale inputs here; 0.003 is the tested value.
+  lr: 0.003
   momentum: 0.9
   weight_decay: 0.0005
   scheduler: plateau
