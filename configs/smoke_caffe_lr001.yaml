@@ -1,0 +1,13 @@
+base: paper_base.yaml
+
+data:
+  ten_crop: false
+  input_scale: caffe
+
+train:
+  lr: 0.001
+  epochs: 5
+  limit_batches: 100
+
+output:
+  dir: runs/smoke_caffe_lr001

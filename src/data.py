@@ -12,6 +12,17 @@ from torchvision.transforms import functional as TF
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]
 
+# Caffe's AlexNet data layer kept pixels on the 0-255 scale and subtracted a
+# per-channel mean. The paper's std=0.01 init assumes that scale.
+CAFFE_MEAN = [123.68, 116.78, 103.94]
+
+
+def _normalizer(input_scale: str):
+    if input_scale == "caffe":
+        mean = torch.tensor(CAFFE_MEAN, dtype=torch.float32).view(3, 1, 1)
+        return lambda tensor: tensor.mul(255.0).sub(mean)
+    return transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD)
+
 # ImageNet RGB PCA basis used by the paper's colour augmentation. Applied to
 # tensors in [0, 1], as in the reference AlexNet implementations.
 PCA_EIGVEC = [
@@ -37,7 +48,8 @@ class PCAColourJitter:
 
 
 def _train_transform(input_size: int, augment: bool, paper_crop: bool = False,
-                     pca_lighting: bool = False) -> transforms.Compose:
+                     pca_lighting: bool = False,
+                     input_scale: str = "imagenet") -> transforms.Compose:
     if augment:
         steps = []
         if paper_crop:
@@ -49,7 +61,7 @@ def _train_transform(input_size: int, augment: bool, paper_crop: bool = False,
         steps.append(transforms.ToTensor())
         if pca_lighting:
             steps.append(PCAColourJitter())
-        steps.append(transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD))
+        steps.append(_normalizer(input_scale))
         return transforms.Compose(steps)
     resize_size = int(round(input_size * 256 / 224))
     return transforms.Compose(
@@ -57,26 +69,29 @@ def _train_transform(input_size: int, augment: bool, paper_crop: bool = False,
             transforms.Resize(resize_size),
             transforms.CenterCrop(input_size),
             transforms.ToTensor(),
-            transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
+            _normalizer(input_scale),
         ]
     )
 
 
-def _stack_crops(crops) -> torch.Tensor:
-    normalize = transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD)
-    return torch.stack(
-        [normalize(TF.to_tensor(crop)) for crop in crops]
-    )
+def _crop_stack(input_scale: str):
+    normalize = _normalizer(input_scale)
+
+    def stack(crops) -> torch.Tensor:
+        return torch.stack([normalize(TF.to_tensor(crop)) for crop in crops])
+
+    return stack
 
 
-def _val_transform(input_size: int, ten_crop: bool = False) -> transforms.Compose:
+def _val_transform(input_size: int, ten_crop: bool = False,
+                   input_scale: str = "imagenet") -> transforms.Compose:
     resize_size = int(round(input_size * 256 / 224))
     if ten_crop:
         return transforms.Compose(
             [
                 transforms.Resize(resize_size),
                 transforms.TenCrop(input_size),
-                transforms.Lambda(_stack_crops),
+                transforms.Lambda(_crop_stack(input_scale)),
             ]
         )
     return transforms.Compose(
@@ -84,7 +99,7 @@ def _val_transform(input_size: int, ten_crop: bool = False) -> transforms.Compos
             transforms.Resize(resize_size),
             transforms.CenterCrop(input_size),
             transforms.ToTensor(),
-            transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
+            _normalizer(input_scale),
         ]
     )
 
@@ -111,12 +126,15 @@ def build_dataloaders(cfg: dict):
     paper_crop = bool(data_cfg.get("paper_crop", False))
     pca_lighting = bool(data_cfg.get("pca_lighting", False))
     ten_crop = bool(data_cfg.get("ten_crop", False))
+    input_scale = str(data_cfg.get("input_scale", "imagenet"))
     train_dataset = datasets.ImageFolder(
         train_dir,
-        transform=_train_transform(input_size, augment, paper_crop, pca_lighting),
+        transform=_train_transform(
+            input_size, augment, paper_crop, pca_lighting, input_scale
+        ),
     )
     val_dataset = datasets.ImageFolder(
-        val_dir, transform=_val_transform(input_size, ten_crop)
+        val_dir, transform=_val_transform(input_size, ten_crop, input_scale)
     )
 
     expected_classes = int(data_cfg["num_classes"])
