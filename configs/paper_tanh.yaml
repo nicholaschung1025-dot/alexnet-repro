@@ -1,0 +1,7 @@
+base: paper_base.yaml
+
+model:
+  activation: tanh
+
+output:
+  dir: runs/paper_tanh

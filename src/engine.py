@@ -116,12 +116,22 @@ def evaluate(
         images = images.to(device, non_blocking=True)
         targets = targets.to(device, non_blocking=True)
 
+        # 10-crop evaluation stacks crops in the batch dimension.
+        ten_crop = images.ndim == 5
+        if ten_crop:
+            batch, crops, channels, height, width = images.shape
+            images = images.reshape(batch * crops, channels, height, width)
+
         with _autocast(device, amp):
             outputs = model(images)
-            loss = criterion(outputs, targets)
+            if ten_crop:
+                outputs = outputs.reshape(batch, crops, -1).softmax(dim=-1).mean(dim=1)
+                loss = -outputs.gather(1, targets.view(-1, 1)).clamp_min(1e-12).log().mean()
+            else:
+                loss = criterion(outputs, targets)
 
         top1, top5 = accuracy(outputs, targets, topk=(1, 5))
-        n = images.size(0)
+        n = targets.size(0)
         loss_meter.update(loss.item(), n)
         top1_meter.update(top1, n)
         top5_meter.update(top5, n)

@@ -21,12 +21,19 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Evaluate AlexNet.")
     parser.add_argument("--config", required=True)
     parser.add_argument("--checkpoint", default=None)
+    parser.add_argument(
+        "--ten-crop",
+        action="store_true",
+        help="Override data.ten_crop for the paper's 10-crop evaluation.",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
     cfg = load_config(args.config)
+    if args.ten_crop:
+        cfg["data"]["ten_crop"] = True
     device = get_device()
 
     data_cfg = cfg["data"]

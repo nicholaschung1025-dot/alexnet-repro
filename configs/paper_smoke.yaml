@@ -1,0 +1,11 @@
+base: paper_base.yaml
+
+data:
+  ten_crop: false
+
+train:
+  epochs: 1
+  limit_batches: 50
+
+output:
+  dir: runs/paper_smoke

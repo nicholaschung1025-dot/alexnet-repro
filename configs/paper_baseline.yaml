@@ -1,0 +1,4 @@
+base: paper_base.yaml
+
+output:
+  dir: runs/paper_baseline

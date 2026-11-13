@@ -1,0 +1,38 @@
+seed: 0
+
+data:
+  root: ~/data/imagenet100
+  train_dir: train
+  val_dir: val
+  num_classes: 100
+  input_size: 224
+  batch_size: 128
+  num_workers: 2
+  pin_memory: true
+  augment: true
+  paper_crop: true
+  pca_lighting: true
+  ten_crop: false
+
+model:
+  dropout: 0.5
+  activation: relu
+  use_lrn: true
+  init: paper
+
+train:
+  epochs: 90
+  optimizer: sgd
+  lr: 0.01
+  momentum: 0.9
+  weight_decay: 0.0005
+  scheduler: plateau
+  lr_patience: 3
+  min_lr: 0.00001
+  amp: false
+  label_smoothing: 0.0
+  grad_clip: 0.0
+  limit_batches: null
+
+output:
+  dir: runs/paper_baseline

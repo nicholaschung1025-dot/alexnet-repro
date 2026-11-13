@@ -15,7 +15,7 @@ import torch
 import yaml
 from torch import nn
 from torch.optim import SGD
-from torch.optim.lr_scheduler import MultiStepLR
+from torch.optim.lr_scheduler import MultiStepLR, ReduceLROnPlateau
 
 from src.data import build_dataloaders
 from src.engine import evaluate, train_one_epoch
@@ -96,11 +96,21 @@ def main() -> None:
     )
 
     milestones = train_cfg.get("lr_milestones") or []
-    scheduler = (
-        MultiStepLR(optimizer, milestones=[int(m) for m in milestones], gamma=0.1)
-        if milestones
-        else None
-    )
+    scheduler_kind = str(train_cfg.get("scheduler", "multistep"))
+    if scheduler_kind == "plateau":
+        scheduler = ReduceLROnPlateau(
+            optimizer,
+            mode="max",
+            factor=0.1,
+            patience=int(train_cfg.get("lr_patience", 3)),
+            min_lr=float(train_cfg.get("min_lr", 1e-5)),
+        )
+    elif milestones:
+        scheduler = MultiStepLR(
+            optimizer, milestones=[int(m) for m in milestones], gamma=0.1
+        )
+    else:
+        scheduler = None
 
     amp = bool(train_cfg.get("amp", True)) and device.type == "cuda"
     scaler = make_scaler(amp)
@@ -203,7 +213,9 @@ def main() -> None:
         )
         # Record the LR actually used for this epoch, before stepping the scheduler.
         lr = optimizer.param_groups[0]["lr"]
-        if scheduler is not None:
+        if isinstance(scheduler, ReduceLROnPlateau):
+            scheduler.step(val_metrics["top1"])
+        elif scheduler is not None:
             scheduler.step()
 
         elapsed = time.time() - started

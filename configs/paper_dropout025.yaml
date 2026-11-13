@@ -1,0 +1,7 @@
+base: paper_base.yaml
+
+model:
+  dropout: 0.25
+
+output:
+  dir: runs/paper_dropout025

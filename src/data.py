@@ -7,21 +7,50 @@ from pathlib import Path
 import torch
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
+from torchvision.transforms import functional as TF
 
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]
 
+# ImageNet RGB PCA basis used by the paper's colour augmentation. Applied to
+# tensors in [0, 1], as in the reference AlexNet implementations.
+PCA_EIGVEC = [
+    [-0.5675, 0.7192, 0.4009],
+    [-0.5808, -0.0045, -0.8140],
+    [-0.5836, -0.6948, 0.4203],
+]
+PCA_EIGVAL = [0.2175, 0.0188, 0.0045]
 
-def _train_transform(input_size: int, augment: bool) -> transforms.Compose:
+
+class PCAColourJitter:
+    """The paper's PCA colour augmentation on a [0, 1] CHW tensor."""
+
+    def __init__(self, sigma: float = 0.1) -> None:
+        self.sigma = sigma
+        self.eigvec = torch.tensor(PCA_EIGVEC, dtype=torch.float32)
+        self.eigval = torch.tensor(PCA_EIGVAL, dtype=torch.float32)
+
+    def __call__(self, image: torch.Tensor) -> torch.Tensor:
+        alpha = torch.normal(0.0, self.sigma, (3,))
+        shift = self.eigvec @ (alpha * self.eigval)
+        return (image + shift.view(3, 1, 1)).clamp_(0.0, 1.0)
+
+
+def _train_transform(input_size: int, augment: bool, paper_crop: bool = False,
+                     pca_lighting: bool = False) -> transforms.Compose:
     if augment:
-        return transforms.Compose(
-            [
-                transforms.RandomResizedCrop(input_size, scale=(0.08, 1.0)),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
-            ]
-        )
+        steps = []
+        if paper_crop:
+            steps.append(transforms.Resize(int(round(input_size * 256 / 224))))
+            steps.append(transforms.RandomCrop(input_size))
+        else:
+            steps.append(transforms.RandomResizedCrop(input_size, scale=(0.08, 1.0)))
+        steps.append(transforms.RandomHorizontalFlip())
+        steps.append(transforms.ToTensor())
+        if pca_lighting:
+            steps.append(PCAColourJitter())
+        steps.append(transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD))
+        return transforms.Compose(steps)
     resize_size = int(round(input_size * 256 / 224))
     return transforms.Compose(
         [
@@ -33,8 +62,23 @@ def _train_transform(input_size: int, augment: bool) -> transforms.Compose:
     )
 
 
-def _val_transform(input_size: int) -> transforms.Compose:
+def _stack_crops(crops) -> torch.Tensor:
+    normalize = transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD)
+    return torch.stack(
+        [normalize(TF.to_tensor(crop)) for crop in crops]
+    )
+
+
+def _val_transform(input_size: int, ten_crop: bool = False) -> transforms.Compose:
     resize_size = int(round(input_size * 256 / 224))
+    if ten_crop:
+        return transforms.Compose(
+            [
+                transforms.Resize(resize_size),
+                transforms.TenCrop(input_size),
+                transforms.Lambda(_stack_crops),
+            ]
+        )
     return transforms.Compose(
         [
             transforms.Resize(resize_size),
@@ -64,10 +108,16 @@ def build_dataloaders(cfg: dict):
 
     input_size = int(data_cfg.get("input_size", 224))
     augment = bool(data_cfg.get("augment", True))
+    paper_crop = bool(data_cfg.get("paper_crop", False))
+    pca_lighting = bool(data_cfg.get("pca_lighting", False))
+    ten_crop = bool(data_cfg.get("ten_crop", False))
     train_dataset = datasets.ImageFolder(
-        train_dir, transform=_train_transform(input_size, augment)
+        train_dir,
+        transform=_train_transform(input_size, augment, paper_crop, pca_lighting),
     )
-    val_dataset = datasets.ImageFolder(val_dir, transform=_val_transform(input_size))
+    val_dataset = datasets.ImageFolder(
+        val_dir, transform=_val_transform(input_size, ten_crop)
+    )
 
     expected_classes = int(data_cfg["num_classes"])
     if len(train_dataset.classes) != expected_classes:
