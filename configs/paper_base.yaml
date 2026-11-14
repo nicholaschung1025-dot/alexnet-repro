@@ -7,7 +7,7 @@ data:
   num_classes: 100
   input_size: 224
   batch_size: 128
-  num_workers: 2
+  num_workers: 0
   pin_memory: false
   augment: true
   paper_crop: true
