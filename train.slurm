@@ -17,4 +17,4 @@ CONFIG="${1:-configs/baseline.yaml}"
 echo "Config: $CONFIG"
 echo "Host: $(hostname)"
 nvidia-smi
-python -u -m src.train --config "$CONFIG"
+python -u -m src.train --config "$CONFIG" "${@:2}"
