@@ -13,6 +13,7 @@ data:
   paper_crop: true
   pca_lighting: true
   ten_crop: false
+  input_scale: caffe
 
 model:
   dropout: 0.5
