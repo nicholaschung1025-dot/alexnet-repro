@@ -19,33 +19,25 @@ matched the paper's ImageNet-1k numbers.
 
 ## Results
 
-| Run | Dataset | Epochs | Top-1 accuracy | Top-5 accuracy | Notes |
-|---|---|---|---:|---:|---|
-| Paper (ILSVRC-2010) | ImageNet-1k | 90 | 62.5% (37.5% error) | 83.0% (17.0% error) | 2× GTX 580 |
-| Ours: baseline | ImageNet-100 | 30 | **14.06%** | **35.04%** | ReLU + dropout, 1× RTX 4080 Super |
-| Ours: tanh | ImageNet-100 | 30 | **22.72%** | **48.70%** | same recipe, tanh |
-| Ours: no dropout | ImageNet-100 | 30 | **29.18%** | **56.64%** | dropout = 0 |
-| Ours: baseline, 90 ep | ImageNet-100 | 90 | **28.34%** | **56.06%** | dropout 0.5 |
-| Ours: tanh, 90 ep | ImageNet-100 | 90 | **33.12%** | **60.70%** | tanh + dropout 0.5 |
-| Ours: dropout 0.25, 90 ep | ImageNet-100 | 90 | **35.68%** | **63.98%** | ReLU + dropout 0.25 |
-| Ours: no dropout, 90 ep | ImageNet-100 | 90 | **41.94%** | **69.68%** | dropout 0.0 |
+Paper-recipe runs: Gaussian init, Caffe-scale inputs, PCA colour, SGD 0.003,
+momentum 0.9, weight decay 5e-4, batch 128, 90 epochs, 10-crop evaluation.
 
-Paper numbers are accuracy derived from the reported error rates. **Do not compare
-absolute numbers across different datasets.** The useful comparison is the
-**relative trend** between our runs.
+| Run | Top-1 | Top-5 |
+|---|---:|---:|
+| ReLU + dropout 0.5 | **71.02%** | **90.68%** |
+| ReLU + dropout 0.25 | 68.04% | 87.60% |
+| ReLU, no dropout | 62.76% | 83.80% |
+| tanh + dropout 0.5 | 50.92% | 78.72% |
 
-At 90 epochs, dropout shows a clear **dose-response**:
+With the paper's recipe, dropout helps monotonically at this scale: 0.5 > 0.25 >
+0. ReLU beats tanh by about 20 points. The paper reports 15.3% top-5 error on
+1,000 classes with seven CNNs; these numbers are top-1 on 100 classes with one
+CNN, so absolute values are not comparable.
 
-```text
-dropout 0.5  → 28.34%
-dropout 0.25 → 35.68%
-dropout 0.0  → 41.94%
-```
-
-Less dropout is better at this scale. The 90-epoch baseline (28.34%) is still
-slightly below the **30-epoch** no-dropout run (29.18%), so dropout 0.5 underfits
-even with a longer schedule. tanh + dropout 0.5 (33.12%) also beats ReLU +
-dropout 0.5 (28.34%), but remains below the lower-dropout runs.
+Earlier Kaiming runs with ImageNet-normalized inputs (lr 0.001, momentum 0) gave
+28.34 / 33.12 / 35.68 / 41.94 top-1 at 90 epochs. That recipe was superseded: it
+did not reproduce the paper's dropout direction. Those results remain in
+`runs/old_paperinit` on the cluster and in git history.
 
 ## Repository layout
 
