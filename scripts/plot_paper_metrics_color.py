@@ -10,8 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 RUNS = [
     ("paper_baseline", "dropout 0.5", "#111111", "-"),
     ("paper_dropout025", "dropout 0.25", "#0072B2", "-"),
-    ("paper_no_dropout", "no dropout", "#E69F00", "--"),
-    ("paper_tanh", "tanh", "#D55E00", "--"),
+    ("paper_no_dropout", "no dropout", "#E69F00", "-"),
+    ("paper_tanh", "tanh", "#D55E00", "-"),
 ]
 
 fig, ax = plt.subplots(figsize=(7.2, 4.2), dpi=220)
